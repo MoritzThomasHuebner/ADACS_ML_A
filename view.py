@@ -13,18 +13,17 @@ from utilities import *
 
 # Parse the arguments
 no_arg = len(sys.argv)
-if (no_arg == 2):
-	plot_ID = int(sys.argv[1])
+if no_arg == 2:
+    plot_ID = int(sys.argv[1])
 else:
-	print("Usage: python view.py <Data_ID>")
-	print("where Data_ID is a number.")
-	print("Example: python view.py 2")
-	sys.exit()
+    print("Usage: python view.py <Data_ID>")
+    print("where Data_ID is a number.")
+    print("Example: python view.py 2")
+    sys.exit()
 
 # Load training data
-N_sequence = 128;    # Length of each piece of data
+N_sequence = 128  # Length of each piece of data
 
 # Load a specific data file and plot the results
-X_train, Y_train = read_training_data(plot_ID,N_sequence)
-plot_results(plot_ID,X_train)
-
+X_train, Y_train = read_training_data(plot_ID, N_sequence)
+plot_results(plot_ID, X_train)
