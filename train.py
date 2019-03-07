@@ -30,22 +30,27 @@ for x in range(N_train):
     # This will create x = 0, 1, 2...to N_train-1
     X_train[x, ], Y_train[x] = read_training_data(x + 1, N_sequence)
 
+
+def normalize_data(data):
+    return data / np.mean(np.abs(data))
+
+
+def thin_data(data):
+    return data[::10]
+
 # Also create the numpy arrays for the testing data set
 N_test = 50
 X_test = np.empty([N_test, N_sequence])
 Y_test = np.empty(N_test)
 for x in range(N_test):
     X_test[x, ], Y_test[x] = read_test_data(x + 1, N_sequence)
+    X_test[x,] = normalize_data(X_test[x, ])
+    X_test[x,] = thin_data(X_test[x, ])
     b, a = signal.butter(2, 0.4)
     zi = signal.lfilter_zi(b, a)
     z, _ = signal.lfilter(b, a, X_test[x, ], zi=zi * sig[0])
     sig = signal.filtfilt(b, a, X_test[x, ])
 
-for i in range(len(X_train)):
-    X_train[i] = apply_noise_and_filter(X_train[i])
-
-for i in range(len(X_test)):
-    X_test[i] = apply_noise_and_filter(X_test[i])
 
 
 model = Sequential()

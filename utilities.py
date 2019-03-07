@@ -22,11 +22,11 @@ def read_training_data(ID, N):
     # Files are in binary, hence precision needs to be provided.
     X = np.zeros(N)
     Y = np.zeros(1)
-    fname = "./Train/X_%d.dat" % ID
+    fname = ".LIGO_DATA/Train_Easy/X_%d.dat" % ID
     print("Loading file " + fname)
     X = np.fromfile(fname, 'double')
     # Now for y
-    fname = "./Train/Y_%d.dat" % ID
+    fname = ".LIGO_DATA/Train_Easy/Y_%d.dat" % ID
     Y = np.fromfile(fname, 'double')
     return X, Y
 
@@ -43,11 +43,11 @@ def read_test_data(ID, N):
     # Files are in binary, hence precision needs to be provided.
     X = np.zeros(N);
     Y = np.zeros(1);
-    fname = "./Test/X_%d.dat" % ID
+    fname = ".LIGO_DATA/Test_Easy/X_%d.dat" % ID
     print("Loading file " + fname)
     X = np.fromfile(fname, 'double')
     # Now for y
-    fname = "./Test/Y_%d.dat" % ID
+    fname = ".LIGO_DATA/Test_Easy/Y_%d.dat" % ID
     Y = np.fromfile(fname, 'double')
     return X, Y
 
