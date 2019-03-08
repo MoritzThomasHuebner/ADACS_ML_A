@@ -4,6 +4,8 @@
 
 # Import modules
 import matplotlib
+import numpy
+from scipy import signal
 
 matplotlib.use('tkagg')
 import matplotlib.pyplot as plt
@@ -22,11 +24,11 @@ def read_training_data(ID, N):
     # Files are in binary, hence precision needs to be provided.
     X = np.zeros(N)
     Y = np.zeros(1)
-    fname = ".LIGO_DATA/Train_Easy/X_%d.dat" % ID
+    fname = "LIGO_DATA/Train_Easy/X_LIGO_%d.dat" % ID
     print("Loading file " + fname)
     X = np.fromfile(fname, 'double')
     # Now for y
-    fname = ".LIGO_DATA/Train_Easy/Y_%d.dat" % ID
+    fname = "LIGO_DATA/Train_Easy/Y_LIGO_%d.dat" % ID
     Y = np.fromfile(fname, 'double')
     return X, Y
 
@@ -43,11 +45,11 @@ def read_test_data(ID, N):
     # Files are in binary, hence precision needs to be provided.
     X = np.zeros(N);
     Y = np.zeros(1);
-    fname = ".LIGO_DATA/Test_Easy/X_%d.dat" % ID
+    fname = "LIGO_DATA/Test_Easy/X_LIGO_%d.dat" % ID
     print("Loading file " + fname)
     X = np.fromfile(fname, 'double')
     # Now for y
-    fname = ".LIGO_DATA/Test_Easy/Y_%d.dat" % ID
+    fname = "LIGO_DATA/Test_Easy/Y_LIGO_%d.dat" % ID
     Y = np.fromfile(fname, 'double')
     return X, Y
 
@@ -72,3 +74,24 @@ def plot_history(history):
     ax.set(xlabel='Epoch', ylabel='Accuracy', title='Accuracy Convergence History')
     plt.show()
     return
+
+def swish(x):
+    beta = 1.5
+    return beta * x * np.exp(x) / (np.exp(x) + 1)
+
+
+def normalize_data(data):
+    return data / np.mean(np.abs(data))
+
+
+def thin_data(data, thinning):
+    return data[::thinning]
+
+
+def filter_data(data, thinning):
+    data = normalize_data(data)
+    b, a = signal.butter(3, 0.01)
+    zi = signal.lfilter_zi(b, a)
+    z, _ = signal.lfilter(b, a, data, zi=zi * data[0])
+    data = signal.filtfilt(b, a, data)
+    return thin_data(data, thinning)

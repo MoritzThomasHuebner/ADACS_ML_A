@@ -25,17 +25,18 @@ else:
 print("Loading file = " + str(ID))
 
 # We still need to know how long the time series is
-N_sequence = 128  # Length of each piece of data
+N_sequence = 200000  # Length of each piece of data
 
 # Create variables for use while inferencing.
 # Keeping it in array form; you might want to inference
 # multiple data sets later.
 X_infer = np.empty([1, N_sequence])
+X_infer_pp = np.empty([1, int(N_sequence / 10)])
 Y_infer = np.empty(1)
 
 # We can take this data from anywhere - let's load one of the training sets
 X_infer[0, ], Y_infer[0] = read_test_data(ID, N_sequence)
-
+X_infer_pp[0, ] = filter_data(X_infer[0, ], 10)
 # Load the JSON file
 json_file = open('model.json', 'r')
 loaded_model_json = json_file.read()
@@ -49,10 +50,10 @@ model.load_weights("model.h5")
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
 # Now try classifying the single data file we loaded
-Class_infer = model.predict_classes(X_infer)
+Class_infer = model.predict_classes(X_infer_pp)
 
 # Compute the class predictions - shouldn't be used as certainties.
-Class_prob = model.predict(X_infer)
+Class_prob = model.predict(X_infer_pp)
 
 print("The predicted class is %d" % Class_infer[0])
 print("Class Predictions: Class 0 = %f, Class 1 = %f" % ((1.0 - Class_prob[0]), Class_prob[0]))

@@ -5,21 +5,22 @@
 # for a binary classification problen.
 
 # Import modules
-import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 # from keras.layers import LSTM
-from keras.layers import Activation
-from keras.utils import plot_model
 from utilities import *
-from scipy import signal
 
 # Create training arrays
 # In this demonstration I create our numpy arrays and then
 # load each time sequence in one-by-one.
-N_train = 200  # Number of elements to train
-N_sequence = 128  # Length of each piece of data
-N_epochs = 300  # Number of epochs
+from utilities import filter_data
+
+N_train = 400  # Number of elements to train
+N_test = 50  # Number of elements to train
+N_sequence = 200000  # Length of each piece of data
+thinning = 10
+N_sequence_thinned = int(N_sequence / thinning)
+N_epochs = 100  # Number of epochs
 
 # Create the training sequence data (X) and each set's classification (Y).
 X_train = np.empty([N_train, N_sequence])
@@ -28,42 +29,48 @@ Y_train = np.empty(N_train)
 # Load the data from file
 for x in range(N_train):
     # This will create x = 0, 1, 2...to N_train-1
-    X_train[x, ], Y_train[x] = read_training_data(x + 1, N_sequence)
+    X_train[x,], Y_train[x] = read_training_data(x + 1, N_sequence)
 
-
-def normalize_data(data):
-    return data / np.mean(np.abs(data))
-
-
-def thin_data(data):
-    return data[::10]
+X_train_pp = np.empty([N_train, int(N_sequence_thinned)])
+X_test_pp = np.empty([N_test, int(N_sequence_thinned)])
 
 # Also create the numpy arrays for the testing data set
-N_test = 50
 X_test = np.empty([N_test, N_sequence])
 Y_test = np.empty(N_test)
+for x in range(N_train):
+    X_train[x, ], Y_train[x] = read_training_data(x + 1, N_sequence)
+    X_train_pp[x, ] = filter_data(X_train[x,], thinning)
+    # if x % 50 == 0:
+    #     plot_results(Y_train[x], np.fft.fft(X_train_pp[x]))
+    #     plot_results(Y_train[x], X_train_pp[x])
+
 for x in range(N_test):
     X_test[x, ], Y_test[x] = read_test_data(x + 1, N_sequence)
-    X_test[x,] = normalize_data(X_test[x, ])
-    X_test[x,] = thin_data(X_test[x, ])
-    b, a = signal.butter(2, 0.4)
-    zi = signal.lfilter_zi(b, a)
-    z, _ = signal.lfilter(b, a, X_test[x, ], zi=zi * sig[0])
-    sig = signal.filtfilt(b, a, X_test[x, ])
+    X_test_pp[x, ] = filter_data(X_test[x, ], thinning)
+    # if x % 50 == 0:
+    #     plot_results(Y_train[x], X_test_pp[x])
 
-
-
+# print(Y_test)
+# print(Y_train)
 model = Sequential()
 
 # Configure our RNN by adding neural layers with activation functions
-model.add(Dropout(0.3, input_shape=(N_sequence, )))
-model.add(Dense(16, activation='relu', input_dim=N_sequence))
-model.add(Dense(8, activation='tanh'))
+# model.add(Dropout(0.3, input_shape=(N_sequence_thinned,)))
+model.add(Dropout(0.2, input_shape=(N_sequence_thinned,)))
+model.add(Dense(16, activation='relu', input_dim=N_sequence_thinned))
+model.add(Dense(8, activation='softmax', input_dim=N_sequence_thinned))
+model.add(Dense(1, activation='sigmoid', input_dim=N_sequence_thinned))
+# model.add(Dense(128, activation='relu', input_dim=N_sequence_thinned))
+# model.add(Dropout(0.2))
+# model.add(Dense(64, activation='softmax'))
+# model.add(Dropout(0.2))
+# model.add(Dense(32, activation=swish))
+# model.add(Dense(16, activation='sigmoid'))
 # model.add(Dropout(0.2))
 # model.add(Dense(8, activation='tanh'))
+# model.add(Dense(8, activation='tanh'))
 # model.add(Dropout(0.4))
-model.add(Dense(1, activation='sigmoid'))
-
+# model.add(Dense(1, activation='sigmoid'))
 
 # The commented lines below are designed to offer some insight
 # into the use of layers without activation functions.
@@ -77,12 +84,19 @@ model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accurac
 print(model.summary())
 
 # Fit the model using the training set
-history = model.fit(X_train, Y_train, epochs=N_epochs, batch_size=32)
+history = model.fit(X_train_pp, Y_train, epochs=N_epochs, batch_size=32)
 
 # Plot the history
 plot_history(history)
 
 # Final evaluation of the model using the Test Data
 print("Evaluating Test Set")
-scores = model.evaluate(X_test, Y_test, verbose=1)
+scores = model.evaluate(X_test_pp, Y_test, verbose=1)
 print("Accuracy: %.2f%%" % (scores[1] * 100))
+
+# Export the model to file
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+        json_file.write(model_json)
+# Save the weights as well, as a HDF5 format
+model.save_weights("model.h5")
