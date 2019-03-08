@@ -9,7 +9,6 @@
 #SBATCH --mem-per-cpu=1000
 #SBATCH --partition=skylake
 #SBATCH --gres=gpu:4
-#SBATCH --account=oz006
 #SBATCH --reservation=ml
 
 # Load the modules
