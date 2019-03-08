@@ -17,7 +17,7 @@ train_dir = './cats_dogs/train'
 test_dir = './cats_dogs/test'
 N_train = 2000  # Total number of training files we have (1000+1000)
 N_test = 200  # Total number of test files we have (100+100)
-N_epochs = 200  # This is not going to be enough.
+N_epochs = 150  # This is not going to be enough.
 
 # It is feasible that the amount of data we are dealing with is substantial.
 # So, in this case, we will practice the use of generators.
