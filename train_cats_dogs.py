@@ -82,3 +82,11 @@ model.fit_generator(train_generator,
 # Only this time, we are evaluating test data with a generator - use evaluate_generator
 scores = model.evaluate_generator(test_generator, steps=N_test // 32)
 print("Accuracy: %.2f%%" % (scores[1] * 100))
+
+# Export the model to file
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+        json_file.write(model_json)
+# Save the weights as well, as a HDF5 format
+model.save_weights("model.h5")
+
